@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BizPulse - SME Business Health Platform</title>
+    <meta name="description" content="Intelligent financial dashboard for complete visibility and AI insights.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    
+    <!-- Tailwind CSS (explicitly requested) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            // Disable preflight to protect the premium Vanilla CSS aesthetic you loved
+            corePlugins: { preflight: false }
+        }
+    </script>
+    
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <!-- Add SweetAlert2 for nice Delete Confirmations -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
+    <script src="app.js" defer></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="ri-pulse-line logo-icon"></i>
+                    <span>BizPulse</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list" id="main-nav">
+                    <li class="nav-item active">
+                        <a href="#" class="nav-link" data-view="dashboard">
+                            <i class="ri-dashboard-line"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-view="transactions">
+                            <i class="ri-exchange-dollar-line"></i>
+                            <span>Transactions</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-view="cashflow">
+                            <i class="ri-pie-chart-2-line"></i>
+                            <span>Cash Flow</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-view="ai">
+                            <i class="ri-ai-generate"></i>
+                            <span>AI Insights</span>
+                            <span class="badge">New</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-view="settings">
+                            <i class="ri-settings-4-line"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="premium-upgrade">
+                    <i class="ri-vip-crown-fill"></i>
+                    <p>Upgrade to Pro</p>
+                    <span>Get advanced forecasting</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Topbar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="menu-toggle" id="menu-toggle" aria-label="Toggle Sidebar">
+                        <i class="ri-menu-2-line"></i>
+                    </button>
+                    <div class="search-bar">
+                        <i class="ri-search-line"></i>
+                        <input type="text" placeholder="Search transactions, insights..." aria-label="Search">
+                    </div>
+                </div>
+                
+                <div class="topbar-right">
+                    <div class="user-profile mr-2">
+                        <img src="https://ui-avatars.com/api/?name=User&background=4f46e5&color=fff" alt="User Avatar" class="avatar">
+                        <div class="user-info">
+                            <span class="user-name" id="profile-name">Loading...</span>
+                            <span class="user-role" id="profile-role">...</span>
+                        </div>
+                    </div>
+                    <button onclick="logout()" class="icon-btn hover:text-red-400 hover:border-red-400 group transition-all" aria-label="Logout" title="Logout">
+                        <i class="ri-logout-box-r-line group-hover:text-red-400"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <div class="dashboard-scroll relative">
+                <div id="view-header" class="dashboard-header mb-6">
+                    <div>
+                        <h1 class="page-title" id="main-title">Financial Overview</h1>
+                        <p class="page-subtitle" id="main-subtitle">Here's your business health at a glance.</p>
+                    </div>
+                    <div class="date-filter">
+                        <button class="btn btn-primary" id="add-entry-btn" onclick="openModal()">
+                            <i class="ri-add-line"></i> Add Entry
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Metrics Grid (Visible only on Dashboard) -->
+                <section class="metrics-grid" id="dashboard-metrics">
+                    <div class="metric-card">
+                        <div class="metric-icon revenue-bg">
+                            <i class="ri-arrow-right-up-line revenue-color"></i>
+                        </div>
+                        <div class="metric-details">
+                            <span class="metric-title">Total Revenue</span>
+                            <h3 class="metric-value text-green-400" id="total-revenue">$0.00</h3>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-icon expense-bg">
+                            <i class="ri-arrow-right-down-line expense-color"></i>
+                        </div>
+                        <div class="metric-details">
+                            <span class="metric-title">Total Expenses</span>
+                            <h3 class="metric-value text-red-400" id="total-expenses">$0.00</h3>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon profit-bg">
+                            <i class="ri-wallet-3-line profit-color"></i>
+                        </div>
+                        <div class="metric-details">
+                            <span class="metric-title">Net Profit</span>
+                            <h3 class="metric-value text-indigo-400" id="net-profit">$0.00</h3>
+                        </div>
+                    </div>
+
+                    <div class="metric-card anomaly-card">
+                        <div class="metric-icon alert-bg">
+                            <i class="ri-alert-line alert-color"></i>
+                        </div>
+                        <div class="metric-details">
+                            <span class="metric-title">AI Status</span>
+                            <h3 class="metric-value text-yellow-500" id="anomalies-count">Healthy</h3>
+                            <div class="metric-trend neutral pt-1">
+                                <span class="text-xs text-gray-400" id="connection-status">Connecting Backend...</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="dashboard-grid">
+                    <!-- Main Chart -->
+                    <section class="chart-section dashboard-panel" id="view-cashflow">
+                        <div class="panel-header">
+                            <h2>Cash Flow Analysis</h2>
+                            <button class="icon-btn" onclick="loadTransactions(true)"><i class="ri-refresh-line"></i></button>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="cashFlowChart"></canvas>
+                        </div>
+                    </section>
+
+                    <!-- AI Insights -->
+                    <section class="ai-insights-section dashboard-panel" id="view-ai">
+                        <div class="panel-header">
+                            <div class="ai-title">
+                                <i class="ri-sparkling-fill bg-gradient-text"></i>
+                                <h2>AI Financial Insights</h2>
+                            </div>
+                            <span class="pulse-indicator"></span>
+                        </div>
+                        <div class="insights-list" id="insights-container">
+                            <!-- Populated via JS -->
+                        </div>
+                    </section>
+
+                    <!-- Recent Transactions -->
+                    <section class="transactions-section dashboard-panel full-span" id="view-transactions">
+                        <div class="panel-header">
+                            <h2>All Transactions</h2>
+                            <span class="text-gray-400 text-sm">Live from Backend</span>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Category</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Amount</th>
+                                        <th class="text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactions-body">
+                                    <!-- Populated via AJAX JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Settings View (Hidden initially) -->
+                <section class="dashboard-panel full-span hidden" id="view-settings">
+                    <div class="panel-header">
+                        <h2>Account Settings</h2>
+                    </div>
+                    <div class="p-8 text-center bg-white/5 rounded-xl border border-white/10">
+                        <div class="w-20 h-20 bg-indigo-500/20 text-indigo-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <i class="ri-settings-4-line text-4xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2">Platform Settings</h3>
+                        <p class="text-gray-400 max-w-sm mx-auto mb-6">Configuration options for your business dashboard including profile management and security preferences will appear here soon.</p>
+                        <div class="flex flex-col gap-3 max-w-xs mx-auto">
+                            <button class="btn btn-secondary text-gray-400" disabled>Update Profile</button>
+                            <button class="btn btn-secondary text-gray-400" disabled>Security Settings</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Tailwind CRUD Modal (Hidden by Default) -->
+    <div id="crudModal" class="fixed inset-0 z-[100] hidden bg-black/60 backdrop-blur-sm flex items-center justify-center">
+        <div class="bg-gray-900 border border-gray-700/50 rounded-xl shadow-2xl w-full max-w-md p-6 transform transition-all">
+            <div class="flex justify-between items-center mb-5">
+                <h3 id="modalTitle" class="text-xl font-bold text-white tracking-tight">Add Transaction</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-white transition-colors">
+                    <i class="ri-close-line text-2xl"></i>
+                </button>
+            </div>
+            
+            <form id="transactionForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                <input type="hidden" id="txId">
+                <input type="hidden" id="txStatus" value="Completed">
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Transaction Name <span class="text-red-500">*</span></label>
+                    <input type="text" id="txName" 
+                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow outline-none" 
+                           placeholder="e.g. Server Hosting">
+                    <p id="nameError" class="text-red-400 text-xs mt-1 hidden">Name is required.</p>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Amount ($) <span class="text-red-500">*</span></label>
+                        <input type="number" id="txAmount" step="0.01" 
+                               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" 
+                               placeholder="199.99">
+                        <p id="amountError" class="text-red-400 text-xs mt-1 hidden">Invalid amount.</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Date <span class="text-red-500">*</span></label>
+                        <input type="date" id="txDate" 
+                               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                        <p id="dateError" class="text-red-400 text-xs mt-1 hidden">Date is required.</p>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Category</label>
+                    <select id="txCategory" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                        <option value="Software">Software</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Operations">Operations</option>
+                        <option value="Payroll">Payroll</option>
+                        <option value="Revenue">Sales / Revenue</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="flex items-center gap-2 pt-2">
+                    <input type="checkbox" id="txIsPositive" class="w-4 h-4 text-indigo-500 bg-gray-800 border-gray-700 rounded focus:ring-indigo-500 focus:ring-offset-gray-900">
+                    <label for="txIsPositive" class="text-sm text-gray-300">This is an Inflow (Revenue/Credit)</label>
+                </div>
+
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeModal()" class="flex-1 py-2.5 px-4 bg-transparent border border-gray-600 text-gray-300 hover:bg-gray-800 rounded-lg font-medium transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" id="submitBtn" class="flex-1 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors shadow-[0_0_15px_rgba(79,70,229,0.4)]">
+                        Save Entry
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BizPulse - Secure Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { corePlugins: { preflight: false } }
+    </script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .auth-bg {
+            background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 400px),
+                        radial-gradient(circle at bottom left, rgba(168, 85, 247, 0.15), transparent 400px),
+                        var(--bg-base);
+        }
+    </style>
+</head>
+<body class="auth-bg flex items-center justify-center min-h-screen p-4 text-white">
+
+    <!-- Container -->
+    <div class="relative w-full max-w-md">
+        <!-- Decorative Glow -->
+        <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-25"></div>
+        
+        <!-- Auth Card -->
+        <div class="relative bg-gray-900 border border-gray-800 rounded-2xl p-8 shadow-2xl backdrop-blur-xl">
+            
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-400 mb-4 border border-indigo-500/20">
+                    <i class="ri-pulse-line text-2xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold tracking-tight">Welcome to BizPulse</h2>
+                <p class="text-gray-400 text-sm mt-2">Sign in to access your financial dashboard</p>
+            </div>
+
+            <div id="error-message" class="hidden mb-4 p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg text-center">
+                Invalid credentials.
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Email Address</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                            <i class="ri-mail-line"></i>
+                        </div>
+                        <input type="email" id="email" required
+                               class="w-full bg-gray-800 border border-gray-700 rounded-lg pl-10 pr-4 py-2.5 text-white placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow" 
+                               placeholder="admin@bizpulse.com">
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-sm font-medium text-gray-300">Password</label>
+                        <a href="#" class="text-xs text-indigo-400 hover:text-indigo-300">Forgot password?</a>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                            <i class="ri-lock-line"></i>
+                        </div>
+                        <input type="password" id="password" required
+                               class="w-full bg-gray-800 border border-gray-700 rounded-lg pl-10 pr-4 py-2.5 text-white placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow" 
+                               placeholder="••••••••">
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" id="login-btn" class="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors shadow-[0_0_15px_rgba(79,70,229,0.3)]">
+                        Sign In <i class="ri-arrow-right-line"></i>
+                    </button>
+                </div>
+                
+                <p class="text-center text-sm text-gray-400 pt-4">
+                    Don't have an account? <button type="button" onclick="toggleView('register')" class="text-indigo-400 font-medium hover:text-indigo-300">Register</button>
+                </p>
+            </form>
+
+            <!-- Register Form (Hidden initially) -->
+            <form id="register-form" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Full Name</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                            <i class="ri-user-line"></i>
+                        </div>
+                        <input type="text" id="reg-name" required
+                               class="w-full bg-gray-800 border border-gray-700 rounded-lg pl-10 pr-4 py-2.5 text-white placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 outline-none transition-shadow" 
+                               placeholder="John Doe">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Email Address</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                            <i class="ri-mail-line"></i>
+                        </div>
+                        <input type="email" id="reg-email" required
+                               class="w-full bg-gray-800 border border-gray-700 rounded-lg pl-10 pr-4 py-2.5 text-white placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 outline-none transition-shadow" 
+                               placeholder="john@example.com">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Role</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                            <i class="ri-shield-user-line"></i>
+                        </div>
+                        <select id="reg-role" class="w-full bg-gray-800 border border-gray-700 rounded-lg pl-10 pr-4 py-2.5 text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-shadow">
+                            <option value="user">Standard User</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Password</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                            <i class="ri-lock-line"></i>
+                        </div>
+                        <input type="password" id="reg-password" required
+                               class="w-full bg-gray-800 border border-gray-700 rounded-lg pl-10 pr-4 py-2.5 text-white placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 outline-none transition-shadow" 
+                               placeholder="••••••••">
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" id="reg-btn" class="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors shadow-[0_0_15px_rgba(168,85,247,0.3)]">
+                        Create Account <i class="ri-user-add-line"></i>
+                    </button>
+                </div>
+                
+                <p class="text-center text-sm text-gray-400 pt-4">
+                    Already have an account? <button type="button" onclick="toggleView('login')" class="text-indigo-400 font-medium hover:text-indigo-300">Sign In</button>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Auth Logic -->
+    <script>
+        const API_URL = 'http://127.0.0.1:8000';
+
+        function toggleView(view) {
+            document.getElementById('error-message').classList.add('hidden');
+            if(view === 'register') {
+                document.getElementById('login-form').classList.add('hidden');
+                document.getElementById('register-form').classList.remove('hidden');
+                document.querySelector('h2').textContent = 'Create an Account';
+                document.querySelector('p').textContent = 'Join BizPulse to manage your finances';
+            } else {
+                document.getElementById('register-form').classList.add('hidden');
+                document.getElementById('login-form').classList.remove('hidden');
+                document.querySelector('h2').textContent = 'Welcome to BizPulse';
+                document.querySelector('p').textContent = 'Sign in to access your financial dashboard';
+            }
+        }
+
+        // Login Submit
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('login-btn');
+            const errorDiv = document.getElementById('error-message');
+            btn.innerHTML = '<i class="ri-loader-4-line animate-spin"></i> Authenticating...';
+            
+            try {
+                // OAuth2PasswordRequestForm expects form-data
+                const formData = new URLSearchParams();
+                formData.append('username', document.getElementById('email').value);
+                formData.append('password', document.getElementById('password').value);
+
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error("Invalid email or password");
+                
+                const data = await response.json();
+                
+                // Store JWT Token
+                localStorage.setItem('bizpulse_token', data.access_token);
+                // Redirect to Dashboard
+                window.location.href = 'index.html';
+                
+            } catch (error) {
+                errorDiv.textContent = error.message;
+                errorDiv.classList.remove('hidden');
+                btn.innerHTML = 'Sign In <i class="ri-arrow-right-line"></i>';
+            }
+        });
+
+        // Register Submit
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('reg-btn');
+            const errorDiv = document.getElementById('error-message');
+            btn.innerHTML = '<i class="ri-loader-4-line animate-spin"></i> Registering...';
+            
+            try {
+                const payload = {
+                    email: document.getElementById('reg-email').value,
+                    password: document.getElementById('reg-password').value,
+                    full_name: document.getElementById('reg-name').value,
+                    role: document.getElementById('reg-role').value
+                };
+
+                const response = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.detail || "Registration failed");
+                }
+                
+                // Auto-login after registration
+                const formData = new URLSearchParams();
+                formData.append('username', payload.email);
+                formData.append('password', payload.password);
+                const loginRes = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData
+                });
+                
+                const data = await loginRes.json();
+                localStorage.setItem('bizpulse_token', data.access_token);
+                window.location.href = 'index.html';
+                
+            } catch (error) {
+                errorDiv.textContent = error.message;
+                errorDiv.classList.remove('hidden');
+                btn.innerHTML = 'Create Account <i class="ri-user-add-line"></i>';
+            }
+        });
+    </script>
+</body>
+</html>
